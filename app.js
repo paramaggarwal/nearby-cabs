@@ -5,6 +5,11 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 
+require('node-jsx').install({
+  extension: '.jsx',
+  harmony: true
+});
+
 var routes = require('./routes/index');
 var users = require('./routes/users');
 
@@ -21,6 +26,18 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+
+var browserify = require('browserify-middleware');
+browserify.settings({
+  transform: [
+    ['reactify', {
+      es6: true
+    }]
+  ]
+});
+
+// browserify all client javascripts
+app.use('/app', browserify('./app'));
 
 app.use('/', routes);
 app.use('/users', users);
