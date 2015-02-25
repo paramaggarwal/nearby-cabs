@@ -50,12 +50,12 @@ var GoogleMapMarkers = React.createClass({
       // console.log(position);
       var currentLocation = new LatLng(position.coords.latitude, position.coords.longitude);
 
-      var markers = React.addons.update(self.state.markers, {$push: [{
-        position: currentLocation
-      }]});
+      // var markers = React.addons.update(self.state.markers, {$push: [{
+      //   position: currentLocation
+      // }]});
 
       self.setState({
-        markers: markers,
+        // markers: markers,
         center: currentLocation
       });
     });
@@ -81,10 +81,6 @@ var GoogleMapMarkers = React.createClass({
       if (err) {
         return console.error(err);
       };
-
-      // self.setState({
-      //   markers: res.body
-      // });
     });
   },
 

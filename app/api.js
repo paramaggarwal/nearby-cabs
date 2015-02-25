@@ -68,7 +68,7 @@ router.post('/marker', function(req, res, next) {
 
 // update
 router.put('/marker/:id', function(req, res, next) {
-  var id = req.params.id
+  var id = req.params.id;
   var latitude = req.body.latitude;
   var longitude = req.body.longitude;
 
