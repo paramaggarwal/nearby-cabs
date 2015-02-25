@@ -39,6 +39,8 @@ browserify.settings({
 // browserify all client javascripts
 app.use('/app', browserify('./app'));
 
+app.use('/api', require('./app/api'));
+
 app.use('/', routes);
 app.use('/users', users);
 

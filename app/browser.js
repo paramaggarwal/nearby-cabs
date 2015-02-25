@@ -6,6 +6,8 @@ var Map = ReactGoogleMaps.Map;
 var Marker = ReactGoogleMaps.Marker;
 var LatLng = GoogleMapsAPI.LatLng;
 
+var geolocation = require('geolocation')
+
 var GoogleMapMarkers = React.createClass({
   getInitialState: function() {
     return {
@@ -15,6 +17,28 @@ var GoogleMapMarkers = React.createClass({
         {position: new LatLng(-34.397, 150.644)}
       ]
     };
+  },
+
+  componentDidMount: function () {
+    var self = this;
+
+    geolocation.getCurrentPosition(function (err, position) {
+      if (err) {
+        console.error(err);
+      }
+
+      console.log(position);
+      var currentLocation = new LatLng(position.coords.latitude, position.coords.longitude);
+
+      var markers = React.addons.update(this.state.markers, {$push: {
+        position: currentLocation
+      }});
+
+      this.setState({
+        markers: markers,
+        center: new LatLng(position.coords.latitude, position.coords.longitude)
+      });
+    })
   },
 
   handleMarkerDrag: function (i, e) {
