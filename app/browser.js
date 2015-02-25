@@ -1,3 +1,4 @@
+var _ = require('underscore');
 var React = require('react/addons');
 
 var ReactGoogleMaps = require('react-googlemaps');
@@ -6,53 +7,85 @@ var Map = ReactGoogleMaps.Map;
 var Marker = ReactGoogleMaps.Marker;
 var LatLng = GoogleMapsAPI.LatLng;
 
-var geolocation = require('geolocation')
+var geolocation = require('geolocation');
+var superagent = require('superagent');
 
 var GoogleMapMarkers = React.createClass({
   getInitialState: function() {
     return {
       center: new LatLng(-34.397, 150.644),
       zoom: 16,
-      markers: [
-        {position: new LatLng(-34.397, 150.644)}
-      ]
+      markers: []
     };
   },
 
   componentDidMount: function () {
     var self = this;
 
+    superagent.get('/api/markers', function (err, res) {
+      if (err) {
+        return console.error(err);
+      };
+
+      var markers = _.map(res.body, function(marker) {
+        return {
+          id: marker.id,
+          position: new LatLng(marker.position.coordinates[1], marker.position.coordinates[0]),
+          created: new Date(marker.time)
+        };
+      });
+
+      // console.log(markers);
+
+      self.setState({
+        markers: markers
+      });
+    });
+
     geolocation.getCurrentPosition(function (err, position) {
       if (err) {
         console.error(err);
       }
 
-      console.log(position);
+      // console.log(position);
       var currentLocation = new LatLng(position.coords.latitude, position.coords.longitude);
 
-      var markers = React.addons.update(this.state.markers, {$push: {
+      var markers = React.addons.update(self.state.markers, {$push: [{
         position: currentLocation
-      }});
+      }]});
 
-      this.setState({
+      self.setState({
         markers: markers,
-        center: new LatLng(position.coords.latitude, position.coords.longitude)
+        center: currentLocation
       });
-    })
+    });
   },
 
-  handleMarkerDrag: function (i, e) {
-    console.log(i, e.latLng);
+  handleMarkerDrag: function (i, id, mapEvent) {
+    console.log(i, id, mapEvent.latLng);
 
     var markers = React.addons
       .update(this.state.markers, {$splice: [[i, 1, {
-        position: e.latLng
+        id: id,
+        position: mapEvent.latLng
       }]]});
 
     this.setState({
       markers: markers
     });
 
+    superagent.put('/api/marker/' + id)
+      .send({ latitude: mapEvent.latLng.lat() })
+      .send({ longitude: mapEvent.latLng.lng() })
+      .end(function (err, res) {
+      if (err) {
+        return console.error(err);
+      };
+
+      // self.setState({
+      //   markers: res.body
+      // });
+    });
   },
 
   render: function() {
@@ -61,8 +94,8 @@ var GoogleMapMarkers = React.createClass({
         initialZoom={this.state.zoom}
         center={this.state.center}
         onCenterChange={this.handleCenterChange}
-        width={700}
-        height={700}
+        width={600}
+        height={480}
         onClick={this.handleMapClick}>
         {this.state.markers.map(this.renderMarkers)}
       </Map>
@@ -71,21 +104,31 @@ var GoogleMapMarkers = React.createClass({
 
   renderMarkers: function(state, i) {
     return (
-      <Marker position={state.position} key={i} draggable onDrag={this.handleMarkerDrag.bind(null, i)} />
+      <Marker position={state.position} key={state.id} draggable onDrag={this.handleMarkerDrag.bind(null, i, state.id)} />
       );
   },
 
   handleMapClick: function(mapEvent) {
-    var marker = {
-      position: mapEvent.latLng
-    };
+    var self = this;
 
-    var markers = React.addons
-      .update(this.state.markers, {$push: [marker]});
+    superagent.post('/api/marker')
+      .send({ latitude: mapEvent.latLng.lat() })
+      .send({ longitude: mapEvent.latLng.lng() })
+      .end(function (err, res) {
+      if (err) {
+        return console.error(err);
+      };
 
-    this.setState({
-      markers: markers,
-      // center: mapEvent.latLng
+      var marker = {
+        id: res.body.generated_keys[0],
+        position: mapEvent.latLng
+      };
+      var markers = React.addons.update(self.state.markers, {$push: [marker]});
+
+      self.setState({
+        markers: markers
+      });
+
     });
   },
 

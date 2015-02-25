@@ -12,14 +12,14 @@ r.connect({
 
     r.dbCreate('findme').run(conn, function (err, res) {
       if (err) {
-        return console.error(err);
+        return console.error(err.msg);
       };
 
       console.log(res);
 
       r.db('findme').tableCreate('markers').run(conn, function (err, res) {
         if (err) {
-          return console.error(err);
+          return console.error(err.msg);
         };
 
         console.log(res);
@@ -44,19 +44,48 @@ router.get('/markers', function(req, res, next) {
   });
 });
 
+// create
 router.post('/marker', function(req, res, next) {
-  var latitude = req.params.latitude;
-  var longitude = req.params.longitude;
+  var latitude = req.body.latitude;
+  var longitude = req.body.longitude;
+
+  if (!latitude || !longitude) {
+    res.status(400).end();
+  };
 
   r.db('findme').table('markers').insert({
     time: r.now(),
-    place: r.point(longitude, latitude).default(null)
-  }).run(conn, function (err, res) {
+    position: r.point(longitude, latitude).default(null)
+  }).run(conn, function (err, result) {
     if (err) {
-      return res.send(500, err);
+      console.error(err);
+      return res.status(500).end();
     };
 
-    res.send(res);
+    res.send(result);
+  });
+});
+
+// update
+router.put('/marker/:id', function(req, res, next) {
+  var id = req.params.id
+  var latitude = req.body.latitude;
+  var longitude = req.body.longitude;
+
+  if (!id || !latitude || !longitude) {
+    res.status(400).end();
+  };
+
+  r.db('findme').table('markers').get(id).update({
+    time: r.now(),
+    position: r.point(longitude, latitude).default(null)
+  }).run(conn, function (err, result) {
+    if (err) {
+      console.error(err);
+      return res.status(500).end();
+    };
+
+    res.send(result);
   });
 });
 
