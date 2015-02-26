@@ -29,3 +29,19 @@
 2015-02-26T09:14:43.460641000 0.681924s notice: To fully expose RethinkDB on the network, bind to all addresses by running rethinkdb with the `--bind all` command line option.
 2015-02-26T09:14:43.460643000 0.681927s notice: Server ready, "Params_MacBook_Pro_local_jx3" 3d4aaf05-2eda-45f0-a1fb-4e6cdc679d16
 2015-02-26T09:14:44.580597000 1.801881s notice: A newer version of the RethinkDB server is available: 1.16.2. You can read the changelog at <https://github.com/rethinkdb/rethinkdb/releases>.
+2015-02-26T10:24:24.235256000 4181.599502s error: Could not write to socket: Protocol wrong type for socket
+2015-02-26T14:58:08.577085000 16998.118708s notice: Server got SIGINT from pid 91742, uid 501; shutting down...
+2015-02-26T14:58:08.578169000 16998.119792s notice: Shutting down client connections...
+2015-02-26T14:58:08.585205000 16998.126828s notice: All client connections closed.
+2015-02-26T14:58:08.585217000 16998.126839s notice: Shutting down storage engine... (This may take a while if you had a lot of unflushed data in the writeback cache.)
+2015-02-26T14:58:08.601404000 16998.143027s notice: Storage engine shut down.
+2015-02-26T14:58:12.257694000 0.546631s notice: Running rethinkdb 1.16.2-1 (CLANG 6.0 (clang-600.0.56))...
+2015-02-26T14:58:12.266337000 0.555269s notice: Running on Darwin 14.1.0 x86_64
+2015-02-26T14:58:12.266389000 0.555319s notice: Loading data from directory /Users/Param/Documents/findme/rethinkdb_data
+2015-02-26T14:58:12.306657000 0.595587s info: Automatically using cache size of 235 MB
+2015-02-26T14:58:12.307264000 0.596194s notice: Listening for intracluster connections on port 29015
+2015-02-26T14:58:12.308090000 0.597020s notice: Listening for client driver connections on port 28015
+2015-02-26T14:58:12.308161000 0.597091s notice: Listening for administrative HTTP connections on port 8080
+2015-02-26T14:58:12.308163000 0.597093s notice: Listening on addresses: 127.0.0.1, ::1
+2015-02-26T14:58:12.308167000 0.597097s notice: To fully expose RethinkDB on the network, bind to all addresses by running rethinkdb with the `--bind all` command line option.
+2015-02-26T14:58:12.308169000 0.597099s notice: Server ready, "Params_MacBook_Pro_local_jx3" 3d4aaf05-2eda-45f0-a1fb-4e6cdc679d16
