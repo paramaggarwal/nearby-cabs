@@ -13,3 +13,19 @@
 2015-02-25T07:44:11.929841000 0.816194s notice: To fully expose RethinkDB on the network, bind to all addresses by running rethinkdb with the `--bind all` command line option.
 2015-02-25T07:44:11.929845000 0.816198s notice: Server ready, "Params_MacBook_Pro_local_jx3" 3d4aaf05-2eda-45f0-a1fb-4e6cdc679d16
 2015-02-25T07:44:17.010718000 5.897269s notice: A newer version of the RethinkDB server is available: 1.16.2. You can read the changelog at <https://github.com/rethinkdb/rethinkdb/releases>.
+2015-02-25T10:24:49.916999000 7217.622532s notice: Server got SIGINT from pid 76098, uid 501; shutting down...
+2015-02-25T10:24:49.917518000 7217.623051s notice: Shutting down client connections...
+2015-02-25T10:24:49.918737000 7217.624270s notice: All client connections closed.
+2015-02-25T10:24:49.918747000 7217.624279s notice: Shutting down storage engine... (This may take a while if you had a lot of unflushed data in the writeback cache.)
+2015-02-25T10:24:49.930911000 7217.636444s notice: Storage engine shut down.
+2015-02-26T09:14:43.399808000 0.621096s notice: Running rethinkdb 1.16.0-1 (CLANG 6.0 (clang-600.0.56))...
+2015-02-26T09:14:43.403335000 0.624620s notice: Running on Darwin 14.1.0 x86_64
+2015-02-26T09:14:43.403373000 0.624656s notice: Loading data from directory /Users/Param/Documents/findme/rethinkdb_data
+2015-02-26T09:14:43.457293000 0.678577s info: Automatically using cache size of 1121 MB
+2015-02-26T09:14:43.458918000 0.680202s notice: Listening for intracluster connections on port 29015
+2015-02-26T09:14:43.460563000 0.681847s notice: Listening for client driver connections on port 28015
+2015-02-26T09:14:43.460635000 0.681919s notice: Listening for administrative HTTP connections on port 8080
+2015-02-26T09:14:43.460637000 0.681920s notice: Listening on addresses: 127.0.0.1, ::1
+2015-02-26T09:14:43.460641000 0.681924s notice: To fully expose RethinkDB on the network, bind to all addresses by running rethinkdb with the `--bind all` command line option.
+2015-02-26T09:14:43.460643000 0.681927s notice: Server ready, "Params_MacBook_Pro_local_jx3" 3d4aaf05-2eda-45f0-a1fb-4e6cdc679d16
+2015-02-26T09:14:44.580597000 1.801881s notice: A newer version of the RethinkDB server is available: 1.16.2. You can read the changelog at <https://github.com/rethinkdb/rethinkdb/releases>.

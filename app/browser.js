@@ -14,6 +14,8 @@ var GoogleMapMarkers = React.createClass({
   getInitialState: function() {
     return {
       center: new LatLng(-34.397, 150.644),
+      windowWidth: window.innerWidth,
+      windowHeight: window.innerHeight,
       zoom: 16,
       markers: []
     };
@@ -21,6 +23,8 @@ var GoogleMapMarkers = React.createClass({
 
   componentDidMount: function () {
     var self = this;
+
+    window.addEventListener('resize', this.handleResize);
 
     superagent.get('/api/markers', function (err, res) {
       if (err) {
@@ -61,6 +65,17 @@ var GoogleMapMarkers = React.createClass({
     });
   },
 
+  componentWillUnmount: function () {
+    window.removeEventListener('resize', this.handleResize);
+  },
+
+  handleResize: function(e) {
+    this.setState({
+      windowHeight: window.innerHeight,
+      windowWidth: window.innerWidth
+    });
+  },
+
   handleMarkerDrag: function (i, id, mapEvent) {
     console.log(i, id, mapEvent.latLng);
 
@@ -90,8 +105,8 @@ var GoogleMapMarkers = React.createClass({
         initialZoom={this.state.zoom}
         center={this.state.center}
         onCenterChange={this.handleCenterChange}
-        width={600}
-        height={480}
+        width={this.state.windowWidth}
+        height={this.state.windowHeight}
         onClick={this.handleMapClick}>
         {this.state.markers.map(this.renderMarkers)}
       </Map>
@@ -100,7 +115,7 @@ var GoogleMapMarkers = React.createClass({
 
   renderMarkers: function(state, i) {
     return (
-      <Marker position={state.position} key={state.id} draggable onDrag={this.handleMarkerDrag.bind(null, i, state.id)} />
+      <Marker animation={2} icon='http://google-maps-icons.googlecode.com/files/car.png' position={state.position} key={state.id} draggable onDrag={this.handleMarkerDrag.bind(null, i, state.id)} />
       );
   },
 
