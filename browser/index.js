@@ -26,7 +26,6 @@ var GoogleMapMarkers = React.createClass({
     window.addEventListener('resize', this.handleResize);
 
     this.socket = io();
-
     this.socket.on('connect', function () {
       console.log('client connected to server');
     });
@@ -34,43 +33,6 @@ var GoogleMapMarkers = React.createClass({
     this.socket.on('news', function (data) {
       console.log(data);
       self.socket.emit('my other event', { my: 'data' });
-    });
-
-    this.socket.on('nearby:'+this.state.center.lat()+':'+this.state.center.lng()+':1000', function (data) {
-
-      var markers = [];
-      if (data.length > 0) {
-        markers = _.map(data, function(result) {
-          var marker = result.doc;
-
-          return {
-            id: marker.id,
-            position: new LatLng(marker.position.coordinates[1], marker.position.coordinates[0]),
-            created: new Date(marker.time),
-            distance: result.distance
-          };
-        });
-      } else {
-        var updatedMarker = data.new_val;
-        markers = _.map(this.state.markers, function(marker) {
-
-          if (updatedMarker.id === marker.id) {
-            return {
-              id: updatedMarker.id,
-              position: new LatLng(updatedMarker.position.coordinates[1], updatedMarker.position.coordinates[0]),
-              created: new Date(updatedMarker.time)
-            }
-          } else {
-            return marker;
-          }
-        });
-      }
-
-      console.log(markers);
-
-      self.setState({
-        markers: markers
-      });
     });
 
     geolocation.getCurrentPosition(function (err, position) {
@@ -83,6 +45,51 @@ var GoogleMapMarkers = React.createClass({
         latitude: position.coords.latitude,
         longitude: position.coords.longitude,
         distance: 1000
+      });
+
+      console.log('Listening on nearby:'
+      +position.coords.latitude+':'
+      +position.coords.longitude
+      +':1000');
+
+      self.socket.on('nearby:'
+        +position.coords.latitude+':'
+        +position.coords.longitude
+        +':1000', function (data) {
+
+        var markers = [];
+        if (data.length > 0) {
+          markers = _.map(data, function(result) {
+            var marker = result.doc;
+
+            return {
+              id: marker.id,
+              position: new LatLng(marker.position.coordinates[1], marker.position.coordinates[0]),
+              created: new Date(marker.time),
+              distance: result.distance
+            };
+          });
+        } else {
+          var updatedMarker = data.new_val;
+          markers = _.map(self.state.markers, function(marker) {
+
+            if (updatedMarker.id === marker.id) {
+              return {
+                id: updatedMarker.id,
+                position: new LatLng(updatedMarker.position.coordinates[1], updatedMarker.position.coordinates[0]),
+                created: new Date(updatedMarker.time)
+              }
+            } else {
+              return marker;
+            }
+          });
+        }
+
+        console.log(markers);
+
+        self.setState({
+          markers: markers
+        });
       });
 
       // console.log(position);
@@ -139,8 +146,15 @@ var GoogleMapMarkers = React.createClass({
         height={this.state.windowHeight}
         onClick={this.handleMapClick}>
         {this.state.markers.map(this.renderMarkers)}
+        {this.renderPositionMarker()}
       </Map>
       );
+  },
+
+  renderPositionMarker: function () {
+    return (
+      <Marker icon='http://i.stack.imgur.com/bKX1s.png' position={this.state.center} />
+    );
   },
 
   renderMarkers: function(state, i) {
@@ -152,25 +166,25 @@ var GoogleMapMarkers = React.createClass({
   handleMapClick: function(mapEvent) {
     var self = this;
 
-    superagent.post('/api/marker')
-      .send({ latitude: mapEvent.latLng.lat() })
-      .send({ longitude: mapEvent.latLng.lng() })
-      .end(function (err, res) {
-      if (err) {
-        return console.error(err);
-      };
+    // superagent.post('/api/marker')
+    //   .send({ latitude: mapEvent.latLng.lat() })
+    //   .send({ longitude: mapEvent.latLng.lng() })
+    //   .end(function (err, res) {
+    //   if (err) {
+    //     return console.error(err);
+    //   };
 
-      var marker = {
-        id: res.body.generated_keys[0],
-        position: mapEvent.latLng
-      };
-      var markers = React.addons.update(self.state.markers, {$push: [marker]});
+    //   var marker = {
+    //     id: res.body.generated_keys[0],
+    //     position: mapEvent.latLng
+    //   };
+    //   var markers = React.addons.update(self.state.markers, {$push: [marker]});
 
-      self.setState({
-        markers: markers
-      });
+    //   self.setState({
+    //     markers: markers
+    //   });
 
-    });
+    // });
   },
 
   handleZoomChange: function(map) {
@@ -187,5 +201,3 @@ var GoogleMapMarkers = React.createClass({
 });
 
 React.render(<GoogleMapMarkers />, document.getElementById('root'));
-
-// React.render(<div>Hello</div>, document.getElementById('root'));
