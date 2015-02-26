@@ -8,38 +8,65 @@ var Marker = ReactGoogleMaps.Marker;
 var LatLng = GoogleMapsAPI.LatLng;
 
 var geolocation = require('geolocation');
-var superagent = require('superagent');
+var io = require('socket.io-client');
 
 var GoogleMapMarkers = React.createClass({
   getInitialState: function() {
     return {
-      center: new LatLng(-34.397, 150.644),
+      center: new LatLng(12.94, 77.54),
       windowWidth: window.innerWidth,
       windowHeight: window.innerHeight,
-      zoom: 16,
+      zoom: 10,
       markers: []
     };
   },
 
   componentDidMount: function () {
     var self = this;
-
     window.addEventListener('resize', this.handleResize);
 
-    superagent.get('/api/markers', function (err, res) {
-      if (err) {
-        return console.error(err);
-      };
+    this.socket = io();
 
-      var markers = _.map(res.body, function(marker) {
-        return {
-          id: marker.id,
-          position: new LatLng(marker.position.coordinates[1], marker.position.coordinates[0]),
-          created: new Date(marker.time)
-        };
-      });
+    this.socket.on('connect', function () {
+      console.log('client connected to server');
+    });
 
-      // console.log(markers);
+    this.socket.on('news', function (data) {
+      console.log(data);
+      self.socket.emit('my other event', { my: 'data' });
+    });
+
+    this.socket.on('nearby:'+this.state.center.lat()+':'+this.state.center.lng()+':1000', function (data) {
+
+      var markers = [];
+      if (data.length > 0) {
+        markers = _.map(data, function(result) {
+          var marker = result.doc;
+
+          return {
+            id: marker.id,
+            position: new LatLng(marker.position.coordinates[1], marker.position.coordinates[0]),
+            created: new Date(marker.time),
+            distance: result.distance
+          };
+        });
+      } else {
+        var updatedMarker = data.new_val;
+        markers = _.map(this.state.markers, function(marker) {
+
+          if (updatedMarker.id === marker.id) {
+            return {
+              id: updatedMarker.id,
+              position: new LatLng(updatedMarker.position.coordinates[1], updatedMarker.position.coordinates[0]),
+              created: new Date(updatedMarker.time)
+            }
+          } else {
+            return marker;
+          }
+        });
+      }
+
+      console.log(markers);
 
       self.setState({
         markers: markers
@@ -48,20 +75,21 @@ var GoogleMapMarkers = React.createClass({
 
     geolocation.getCurrentPosition(function (err, position) {
       if (err) {
-        console.error(err);
+        return console.error(err);
       }
 
-      // console.log(position);
-      var currentLocation = new LatLng(position.coords.latitude, position.coords.longitude);
-
-      // var markers = React.addons.update(self.state.markers, {$push: [{
-      //   position: currentLocation
-      // }]});
-
-      self.setState({
-        // markers: markers,
-        center: currentLocation
+      // ask for nearby markers and further changes
+      self.socket.emit('nearby', {
+        latitude: position.coords.latitude,
+        longitude: position.coords.longitude,
+        distance: 1000
       });
+
+      // console.log(position);
+      self.setState({
+        center: new LatLng(position.coords.latitude, position.coords.longitude),
+        zoom: 15
+      });      
     });
   },
 
@@ -89,20 +117,22 @@ var GoogleMapMarkers = React.createClass({
       markers: markers
     });
 
-    superagent.put('/api/marker/' + id)
-      .send({ latitude: mapEvent.latLng.lat() })
-      .send({ longitude: mapEvent.latLng.lng() })
-      .end(function (err, res) {
-      if (err) {
-        return console.error(err);
-      };
-    });
+    // superagent.put('/api/marker/' + id)
+    //   .send({ latitude: mapEvent.latLng.lat() })
+    //   .send({ longitude: mapEvent.latLng.lng() })
+    //   .end(function (err, res) {
+    //   if (err) {
+    //     return console.error(err);
+    //   };
+    // });
   },
 
   render: function() {
+    window.state = this.state;
     return (
       <Map
-        initialZoom={this.state.zoom}
+        zoom={this.state.zoom}
+        onZoomChange={this.handleZoomChange}
         center={this.state.center}
         onCenterChange={this.handleCenterChange}
         width={this.state.windowWidth}
@@ -140,6 +170,12 @@ var GoogleMapMarkers = React.createClass({
         markers: markers
       });
 
+    });
+  },
+
+  handleZoomChange: function(map) {
+    this.setState({
+      zoom: map.getZoom()
     });
   },
 
