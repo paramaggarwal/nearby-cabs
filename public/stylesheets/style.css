@@ -7,3 +7,11 @@ body {
 a {
   color: #00B7FF;
 }
+
+.overlay-nearest {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 0;
+  text-shadow: white 1px 1px 1px;
+}

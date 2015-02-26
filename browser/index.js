@@ -6,6 +6,7 @@ var GoogleMapsAPI = window.google.maps;
 var Map = ReactGoogleMaps.Map;
 var Marker = ReactGoogleMaps.Marker;
 var LatLng = GoogleMapsAPI.LatLng;
+var OverlayView = ReactGoogleMaps.OverlayView;
 
 var geolocation = require('geolocation');
 var io = require('socket.io-client');
@@ -79,19 +80,34 @@ var GoogleMapMarkers = React.createClass({
   render: function() {
     window.state = this.state;
     return (
-      <Map
-        zoom={this.state.zoom}
-        onZoomChange={this.handleZoomChange}
+      <div>
+        <Map
+          zoom={this.state.zoom}
+          onZoomChange={this.handleZoomChange}
 
-        center={this.state.center}
-        onCenterChange={this.handleCenterChange}
+          center={this.state.center}
+          onCenterChange={this.handleCenterChange}
 
-        width={this.state.windowWidth}
-        height={this.state.windowHeight}
-        onClick={this.handleMapClick}>
-        {this.state.markers.map(this.renderMarkers)}
-        {this.renderPositionMarker()}
-      </Map>
+          width={this.state.windowWidth}
+          height={this.state.windowHeight}
+          onClick={this.handleMapClick}>
+          {this.state.markers.map(this.renderMarkers)}
+          {this.renderPositionMarker()}
+        </Map>
+        <div className='overlay-nearest'>
+          <h3>Well, hello there.</h3>
+          <p>
+            Try dragging the map around, to find nearby cabs.
+            The cabs update positions in realtime.
+            Geo-spatial queries and changefeeds made possible with RethinkDB.
+            There is no polling anywhere in the entire flow.
+          </p>
+          <p>
+            Code on <a href='http://github.com/paramaggarwal/nearby-cabs'>Github</a>,
+            by <a href='http://paramaggarwal.com'>Param Aggarwal</a>.
+          </p>
+        </div>
+      </div>
       );
   },
 

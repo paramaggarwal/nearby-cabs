@@ -63,3 +63,14 @@
 2015-02-26T20:50:31.613616000 0.626894s notice: Listening on addresses: 127.0.0.1, ::1
 2015-02-26T20:50:31.613633000 0.626911s notice: To fully expose RethinkDB on the network, bind to all addresses by running rethinkdb with the `--bind all` command line option.
 2015-02-26T20:50:31.613637000 0.626915s notice: Server ready, "Params_MacBook_Pro_local_jx3" 3d4aaf05-2eda-45f0-a1fb-4e6cdc679d16
+2015-02-26T22:35:01.374106000 0.599942s notice: Recursively removing directory /Users/Param/Documents/nearby-cabs/rethinkdb_data/tmp
+2015-02-26T22:35:01.375175000 0.601015s notice: Running rethinkdb 1.16.2-1 (CLANG 6.0 (clang-600.0.56))...
+2015-02-26T22:35:01.378555000 0.604391s notice: Running on Darwin 14.1.0 x86_64
+2015-02-26T22:35:01.378595000 0.604430s notice: Loading data from directory /Users/Param/Documents/nearby-cabs/rethinkdb_data
+2015-02-26T22:35:01.417674000 0.643509s info: Automatically using cache size of 159 MB
+2015-02-26T22:35:01.418260000 0.644095s notice: Listening for intracluster connections on port 29015
+2015-02-26T22:35:01.419128000 0.644964s notice: Listening for client driver connections on port 28015
+2015-02-26T22:35:01.419270000 0.645105s notice: Listening for administrative HTTP connections on port 8080
+2015-02-26T22:35:01.419276000 0.645111s notice: Listening on addresses: 127.0.0.1, ::1
+2015-02-26T22:35:01.419278000 0.645113s notice: To fully expose RethinkDB on the network, bind to all addresses by running rethinkdb with the `--bind all` command line option.
+2015-02-26T22:35:01.419281000 0.645116s notice: Server ready, "Params_MacBook_Pro_local_jx3" 3d4aaf05-2eda-45f0-a1fb-4e6cdc679d16
