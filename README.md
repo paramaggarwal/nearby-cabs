@@ -1,5 +1,5 @@
 # nearby-cabs
-Find My Friends backend with RethinkDB geo-queries and changefeeds. Think Uber.
+Nearby cab search with RethinkDB geo-queries and changefeeds. Think Uber.
 
 This is meant to be a demo of some capabilities of RethinkDB:
 
