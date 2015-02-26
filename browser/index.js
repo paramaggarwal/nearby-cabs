@@ -30,9 +30,13 @@ var GoogleMapMarkers = React.createClass({
       console.log('client connected to server');
     });
 
-    this.socket.on('news', function (data) {
+    this.socket.on('disconnect', function () {
+      console.log('client disconnected from server');
+    });
+
+    this.socket.on('log', function (data) {
       console.log(data);
-      self.socket.emit('my other event', { my: 'data' });
+      self.socket.emit('log', "Hello from client " + self.socket.id);
     });
 
     geolocation.getCurrentPosition(function (err, position) {
@@ -40,68 +44,67 @@ var GoogleMapMarkers = React.createClass({
         return console.error(err);
       }
 
-      // ask for nearby markers and further changes
-      self.socket.emit('nearby', {
+      // emit current position to server
+      self.socket.emit('position', {
         latitude: position.coords.latitude,
         longitude: position.coords.longitude,
-        distance: 1000
+        distance: 2000
       });
 
-      console.log('Listening on nearby:'
-      +position.coords.latitude+':'
-      +position.coords.longitude
-      +':1000');
+      console.log('My Location: ', position);
 
-      self.socket.on('nearby:'
-        +position.coords.latitude+':'
-        +position.coords.longitude
-        +':1000', function (data) {
-
-        var markers = [];
-        if (data.length > 0) {
-          markers = _.map(data, function(result) {
-            var marker = result.doc;
-
-            return {
-              id: marker.id,
-              position: new LatLng(marker.position.coordinates[1], marker.position.coordinates[0]),
-              created: new Date(marker.time),
-              distance: result.distance
-            };
-          });
-        } else {
-          var updatedMarker = data.new_val;
-          markers = _.map(self.state.markers, function(marker) {
-
-            if (updatedMarker.id === marker.id) {
-              return {
-                id: updatedMarker.id,
-                position: new LatLng(updatedMarker.position.coordinates[1], updatedMarker.position.coordinates[0]),
-                created: new Date(updatedMarker.time)
-              }
-            } else {
-              return marker;
-            }
-          });
-        }
-
-        console.log(markers);
-
-        self.setState({
-          markers: markers
-        });
-      });
-
-      // console.log(position);
       self.setState({
         center: new LatLng(position.coords.latitude, position.coords.longitude),
         zoom: 15
       });      
     });
+
+    this.socket.on('markers', function (markers) {
+      var markers = _.map(markers, function(result) {
+        var marker = result.doc;
+
+        return {
+          id: marker.id,
+          position: new LatLng(marker.position.coordinates[1], marker.position.coordinates[0]),
+          created: new Date(marker.time),
+          distance: result.dist
+        };
+      });
+
+      console.log('Markers: ', markers);
+
+      self.setState({
+        markers: markers
+      });
+    });
+
+    this.socket.on('update', function (marker) {
+      var updatedMarker = marker.new_val;
+      var markers = _.map(self.state.markers, function(marker) {
+
+        if (updatedMarker.id === marker.id) {
+          console.log('Updated marker: ', updatedMarker);
+
+          return {
+            id: updatedMarker.id,
+            position: new LatLng(updatedMarker.position.coordinates[1], updatedMarker.position.coordinates[0]),
+            created: new Date(updatedMarker.time),
+            distance: updatedMarker.distance
+          }
+        } else {
+          return marker;
+        }
+      });
+
+      self.setState({
+        markers: markers
+      });
+    });
   },
 
   componentWillUnmount: function () {
     window.removeEventListener('resize', this.handleResize);
+    this.socket.close();
   },
 
   handleResize: function(e) {
@@ -140,8 +143,10 @@ var GoogleMapMarkers = React.createClass({
       <Map
         zoom={this.state.zoom}
         onZoomChange={this.handleZoomChange}
+
         center={this.state.center}
         onCenterChange={this.handleCenterChange}
+
         width={this.state.windowWidth}
         height={this.state.windowHeight}
         onClick={this.handleMapClick}>
@@ -153,14 +158,14 @@ var GoogleMapMarkers = React.createClass({
 
   renderPositionMarker: function () {
     return (
-      <Marker icon='http://i.stack.imgur.com/bKX1s.png' position={this.state.center} />
+      <Marker icon='http://i.stack.imgur.com/orZ4x.png' position={this.state.center} />
     );
   },
 
   renderMarkers: function(state, i) {
     return (
       <Marker animation={2} icon='http://google-maps-icons.googlecode.com/files/car.png' position={state.position} key={state.id} draggable onDrag={this.handleMarkerDrag.bind(null, i, state.id)} />
-      );
+    );
   },
 
   handleMapClick: function(mapEvent) {

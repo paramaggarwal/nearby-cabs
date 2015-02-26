@@ -114,11 +114,18 @@ function nearbyMarkerChanges (circle, cb) {
     throw new Error('required longitude/latitude/distance for creating circle not passed');
   };
 
-  r.db('findme').table('markers').changes()
-    .filter(
-      r.circle(r.point(circle.longitude, circle.latitude), circle.distance)
-      .includes(r.row('new_val')('position'))
-    ).run(function (err, cursor) {
+  var currentPosition = r.point(circle.longitude, circle.latitude);
+  var searchCircle = r.circle(currentPosition, circle.distance);
+
+  return r.db('findme').table('markers').changes()
+    .filter(searchCircle.includes(r.row('new_val')('position'))
+    ).merge(function(marker) {
+      return {
+        new_val: {
+          distance: currentPosition.distance(marker('new_val')('position'))
+        }
+      };
+    }).run(function (err, cursor) {
       if (err) {
         return cb(err);
       };
@@ -130,8 +137,7 @@ function nearbyMarkerChanges (circle, cb) {
 
         cb(null, result);
       });
-    }
-  );
+    });
 };
 
 module.exports = function () {

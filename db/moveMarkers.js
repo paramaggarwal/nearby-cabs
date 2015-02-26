@@ -8,10 +8,12 @@ function moveMarkers() {
     };
 
     var modifiedResults = _.each(results, function (result) {
+      if (Math.random() < 0.3) {
         result.position.coordinates[0] += (Math.random() - 0.5) / 500;
         result.position.coordinates[1] += (Math.random() - 0.5) / 500;
-        
-        return result;
+      }
+
+      return result;
     });
 
     r.db('findme').table('markers').insert(modifiedResults, {conflict: 'replace'}).run(function (err, res) {
@@ -24,4 +26,4 @@ function moveMarkers() {
   });
 }
 
-setInterval(moveMarkers, 1000);
+setInterval(moveMarkers, Math.random()*10000);
