@@ -25,81 +25,20 @@ var GoogleMapMarkers = React.createClass({
     var self = this;
     window.addEventListener('resize', this.handleResize);
 
-    this.socket = io();
-    this.socket.on('connect', function () {
-      console.log('client connected to server');
-    });
-
-    this.socket.on('disconnect', function () {
-      console.log('client disconnected from server');
-    });
-
-    this.socket.on('log', function (data) {
-      console.log(data);
-      self.socket.emit('log', "Hello from client " + self.socket.id);
-    });
-
     geolocation.getCurrentPosition(function (err, position) {
       if (err) {
         return console.error(err);
       }
 
-      // emit current position to server
-      self.socket.emit('position', {
-        latitude: position.coords.latitude,
-        longitude: position.coords.longitude,
-        distance: 2000
-      });
-
-      console.log('My Location: ', position);
-
       self.setState({
         center: new LatLng(position.coords.latitude, position.coords.longitude),
         zoom: 15
       });      
+
+      self.emitPosition();
     });
 
-    this.socket.on('markers', function (markers) {
-      var markers = _.map(markers, function(result) {
-        var marker = result.doc;
-
-        return {
-          id: marker.id,
-          position: new LatLng(marker.position.coordinates[1], marker.position.coordinates[0]),
-          created: new Date(marker.time),
-          distance: result.dist
-        };
-      });
-
-      console.log('Markers: ', markers);
-
-      self.setState({
-        markers: markers
-      });
-    });
-
-    this.socket.on('update', function (marker) {
-      var updatedMarker = marker.new_val;
-      var markers = _.map(self.state.markers, function(marker) {
-
-        if (updatedMarker.id === marker.id) {
-          console.log('Updated marker: ', updatedMarker);
-
-          return {
-            id: updatedMarker.id,
-            position: new LatLng(updatedMarker.position.coordinates[1], updatedMarker.position.coordinates[0]),
-            created: new Date(updatedMarker.time),
-            distance: updatedMarker.distance
-          }
-        } else {
-          return marker;
-        }
-      });
-
-      self.setState({
-        markers: markers
-      });
-    });
+    this.configureSockets();
   },
 
   componentWillUnmount: function () {
@@ -202,7 +141,81 @@ var GoogleMapMarkers = React.createClass({
     this.setState({
       center: map.getCenter()
     });
+
+    this.emitPosition();
+  },
+
+  emitPosition: _.debounce(function () {
+    // emit current position to server
+    this.socket.emit('position', {
+      latitude: this.state.center.lat(),
+      longitude: this.state.center.lng(),
+      distance: 2000
+    });
+
+    console.log('Current location: ', this.state.center.lat(), this.state.center.lng());
+  }, 500),
+
+  configureSockets: function () {
+    var self = this;
+
+    this.socket = io();
+    this.socket.on('connect', function () {
+      console.log('client connected to server');
+    });
+
+    this.socket.on('disconnect', function () {
+      console.log('client disconnected from server');
+    });
+
+    this.socket.on('log', function (data) {
+      console.log(data);
+      self.socket.emit('log', "Hello from client " + self.socket.id);
+    });
+
+    this.socket.on('markers', function (markers) {
+      var markers = _.map(markers, function(result) {
+        var marker = result.doc;
+
+        return {
+          id: marker.id,
+          position: new LatLng(marker.position.coordinates[1], marker.position.coordinates[0]),
+          created: new Date(marker.time),
+          distance: result.dist
+        };
+      });
+
+      console.log('Markers: ', markers);
+
+      self.setState({
+        markers: markers
+      });
+    });
+
+    this.socket.on('update', function (marker) {
+      var updatedMarker = marker.new_val;
+      var markers = _.map(self.state.markers, function(marker) {
+
+        if (updatedMarker.id === marker.id) {
+          console.log('Updated marker: ', updatedMarker);
+
+          return {
+            id: updatedMarker.id,
+            position: new LatLng(updatedMarker.position.coordinates[1], updatedMarker.position.coordinates[0]),
+            created: new Date(updatedMarker.time),
+            distance: updatedMarker.distance
+          }
+        } else {
+          return marker;
+        }
+      });
+
+      self.setState({
+        markers: markers
+      });
+    });
   }
+
 });
 
 React.render(<GoogleMapMarkers />, document.getElementById('root'));

@@ -135,7 +135,7 @@ function nearbyMarkerChanges (circle, cb) {
           return cb(err);
         };
 
-        cb(null, result);
+        cb(null, result, cursor);
       });
     });
 };
