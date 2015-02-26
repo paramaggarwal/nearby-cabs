@@ -10,8 +10,14 @@ require('node-jsx').install({
   harmony: true
 });
 
-var routes = require('./routes/index');
-var users = require('./routes/users');
+var browserify = require('browserify-middleware');
+browserify.settings({
+  transform: [
+    ['reactify', {
+      es6: true
+    }]
+  ]
+});
 
 var app = express();
 
@@ -27,22 +33,13 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-var browserify = require('browserify-middleware');
-browserify.settings({
-  transform: [
-    ['reactify', {
-      es6: true
-    }]
-  ]
-});
+// browser scripts
+app.use('/scripts/browser', browserify('./browser'));
 
-// browserify all client javascripts
-app.use('/app', browserify('./app'));
-
-app.use('/api', require('./app/api'));
-
-app.use('/', routes);
-app.use('/users', users);
+// routes
+app.use('/', require('./routes/index'));
+app.use('/api', require('./routes/api'));
+app.use('/users', require('./routes/users'));
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -74,6 +71,5 @@ app.use(function(err, req, res, next) {
         error: {}
     });
 });
-
 
 module.exports = app;
