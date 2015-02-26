@@ -18,7 +18,8 @@ var GoogleMapMarkers = React.createClass({
       windowWidth: window.innerWidth,
       windowHeight: window.innerHeight,
       zoom: 10,
-      markers: []
+      markers: [],
+      nearestMarker: {}
     };
   },
 
@@ -78,7 +79,10 @@ var GoogleMapMarkers = React.createClass({
   },
 
   render: function() {
-    window.state = this.state;
+    var nearestCabMessage = (this.state.nearestMarker && this.state.nearestMarker.distance)
+      ? 'The nearest cab is just '+parseInt(this.state.nearestMarker.distance, 10)+'m away.'
+      : '';
+
     return (
       <div>
         <Map
@@ -95,7 +99,7 @@ var GoogleMapMarkers = React.createClass({
           {this.renderPositionMarker()}
         </Map>
         <div className='overlay-nearest'>
-          <h3>Well, hello there.</h3>
+          <h3>Well, hello there. {nearestCabMessage}</h3>
           <p>
             Try dragging the map around, to find nearby cabs.
             The cabs update positions in realtime.
@@ -118,9 +122,16 @@ var GoogleMapMarkers = React.createClass({
   },
 
   renderMarkers: function(state, i) {
-    return (
-      <Marker animation={2} icon='http://google-maps-icons.googlecode.com/files/car.png' position={state.position} key={state.id} draggable onDrag={this.handleMarkerDrag.bind(null, i, state.id)} />
-    );
+
+    if (this.state.nearestMarker && (this.state.nearestMarker.id === state.id)) {
+      return (
+        <Marker animation={2} icon='http://macaulay.cuny.edu/eportfolios/borders/files/leaflet-maps-marker-icons/sportutilityvehicle.png' position={state.position} key={state.id} draggable onDrag={this.handleMarkerDrag.bind(null, i, state.id)} />
+      );
+    } else {
+      return (
+        <Marker animation={2} icon='http://google-maps-icons.googlecode.com/files/car.png' position={state.position} key={state.id} draggable onDrag={this.handleMarkerDrag.bind(null, i, state.id)} />
+      );
+    }
   },
 
   handleMapClick: function(mapEvent) {
@@ -203,9 +214,7 @@ var GoogleMapMarkers = React.createClass({
 
       console.log('Markers: ', markers);
 
-      self.setState({
-        markers: markers
-      });
+      self.updateMarkers(markers);
     });
 
     this.socket.on('update', function (marker) {
@@ -226,9 +235,31 @@ var GoogleMapMarkers = React.createClass({
         }
       });
 
-      self.setState({
-        markers: markers
-      });
+      self.updateMarkers(markers);
+    });
+  },
+
+  updateMarkers: function (markers) {
+    var nearest;
+    _.each(markers, function (marker) {
+      if (!nearest) {
+        nearest = marker;
+      };
+
+      if (nearest.distance > marker.distance) {
+        nearest = marker;
+      };
+    });
+
+    console.log(nearest);
+    if (nearest) {
+      this.setState({
+        nearestMarker: nearest
+      });      
+    };
+
+    this.setState({
+      markers: markers
     });
   }
 
